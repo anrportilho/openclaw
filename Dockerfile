@@ -20,7 +20,7 @@ RUN mkdir -p /home/node/libs \
     && npm install cheerio puppeteer axios
 # Instalar browsers do Playwright
 RUN npx playwright install chromium --with-deps
-# Criar config inicial permanente
+# Criar config inicial permanente (ambos os nomes por segurança)
 RUN mkdir -p /home/node/.openclaw && cat > /home/node/.openclaw/openclaw.json << 'EOF'
 {
   "agents": {
@@ -42,11 +42,14 @@ RUN mkdir -p /home/node/.openclaw && cat > /home/node/.openclaw/openclaw.json <<
     },
     "trustedProxies": ["10.11.0.9"],
     "controlUi": {
-      "allowedOrigins": ["https://openclaw-openclaw-gateway.iw70il.easypanel.host"]
+      "allowedOrigins": ["https://openclaw-openclaw-gateway.iw70il.easypanel.host"],
+      "dangerouslyAllowHostHeaderOriginFallback": true
     }
   }
 }
 EOF
+# Copiar também como config.json
+RUN cp /home/node/.openclaw/openclaw.json /home/node/.openclaw/config.json
 # Permissões corretas
 RUN chown -R node:node /home/node/libs /home/node/.openclaw
 USER node
