@@ -1,47 +1,20 @@
 FROM ghcr.io/openclaw/openclaw:2026.3.23
-
 USER root
 
 # Instalar dependências do sistema
 RUN apt-get update && apt-get install -y \
-    libnspr4 \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    libpango-1.0-0 \
-    libcairo2 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxext6 \
-    libxshmfence1 \
-    python3 \
-    python3-pip \
-    wget \
-    curl \
-    unzip \
-    git \
+    libnspr4 libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+    libcups2 libdrm2 libxkbcommon0 libxcomposite1 \
+    libxdamage1 libxfixes3 libxrandr2 libgbm1 \
+    libasound2 libpango-1.0-0 libcairo2 \
+    libx11-6 libx11-xcb1 libxcb1 libxext6 libxshmfence1 \
+    python3 python3-pip wget curl unzip git \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar libs Python
 RUN pip3 install --break-system-packages \
-    selenium \
-    playwright \
-    beautifulsoup4 \
-    requests \
-    httpx \
-    lxml \
-    pandas \
-    numpy
+    selenium playwright beautifulsoup4 \
+    requests httpx lxml pandas numpy
 
 # Instalar libs Node.js
 RUN mkdir -p /home/node/libs \
@@ -52,7 +25,32 @@ RUN mkdir -p /home/node/libs \
 # Instalar browsers do Playwright
 RUN npx playwright install chromium --with-deps
 
+# Criar config inicial permanente
+RUN mkdir -p /home/node/.openclaw && cat > /home/node/.openclaw/openclaw.json << 'EOF'
+{
+  "agents": {
+    "defaults": {
+      "compaction": { "mode": "safeguard" },
+      "maxConcurrent": 4,
+      "subagents": { "maxConcurrent": 8 }
+    }
+  },
+  "messages": { "ackReactionScope": "group-mentions" },
+  "commands": { "native": "auto", "nativeSkills": "auto", "restart": true },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "lan",
+    "auth": {
+      "mode": "token",
+      "token": "3fdac5ebd91697bb34b63c8de0d2e2f65631ce69cc3afeb6"
+    },
+    "trustedProxies": ["10.11.0.9"]
+  }
+}
+EOF
+
 # Permissões corretas
-RUN chown -R node:node /home/node/libs
+RUN chown -R node:node /home/node/libs /home/node/.openclaw
 
 USER node
