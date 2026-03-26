@@ -59,6 +59,7 @@ RUN mkdir -p /home/node/.openclaw \
     && chown -R node:node /home/node/libs
 
 # Permitir node usar sudo sem senha
-RUN echo "node ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/node \
+    && chmod 0440 /etc/sudoers.d/node
 
 USER node
