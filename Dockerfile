@@ -52,8 +52,12 @@ RUN playwright install chromium --with-deps \
     && chown -R node:node /home/node/.cache/ms-playwright \
     && chmod -R 755 /root/.cache/ms-playwright
 
-# Instalar libs Node.js globalmente em /app
-RUN cd /app && npm install cheerio puppeteer axios
+# Instalar libs Node.js em diretório separado (não sobrescrever /app)
+RUN mkdir -p /home/node/libs \
+    && cd /home/node/libs \
+    && npm init -y \
+    && npm install cheerio puppeteer axios \
+    && chown -R node:node /home/node/libs
 
 # Permissões corretas
 RUN mkdir -p /home/node/.openclaw \
